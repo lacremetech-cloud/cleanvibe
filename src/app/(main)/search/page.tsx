@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Search as SearchIcon } from 'lucide-react'
 import { useSongs } from '@/lib/hooks/useSongs'
 import SongRow from '@/components/songs/SongRow'
 import SongCard from '@/components/songs/SongCard'
 import Spinner from '@/components/ui/Spinner'
-import Header from '@/components/layout/Header'
 
 const GENRES = ['Nasheed', 'Rap', 'R&B', 'Lo-fi', 'Pop', 'Acoustic', 'Classical', 'Electronic']
 
@@ -22,7 +21,7 @@ const genreColors = [
   'from-pink-600 to-pink-900',
 ]
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const initialQuery = searchParams.get('q') ?? ''
   const initialGenre = searchParams.get('genre') ?? undefined
@@ -138,5 +137,13 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center pt-32"><Spinner size="lg" /></div>}>
+      <SearchContent />
+    </Suspense>
   )
 }
