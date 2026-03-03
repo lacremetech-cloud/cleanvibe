@@ -213,7 +213,7 @@ export default function AudioPlayer() {
 
       {/* ── MINI PLAYER BAR ── */}
       {!isExpanded && (
-        <div className="fixed bottom-0 left-0 right-0 z-30 md:bottom-0" style={{ bottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-40">
           {/* Barre de progression fine */}
           <div className="h-[3px] bg-cv-border">
             <div className="h-full bg-cv-primary transition-all duration-300" style={{ width: `${progress}%` }} />
