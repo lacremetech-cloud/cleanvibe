@@ -102,7 +102,7 @@ export default function AdminSongsPage() {
       // Upload audio
       if (audioFile) {
         setUploadProgress('Uploading audio…')
-        const audioPath = `${user.id}/${Date.now()}_${audioFile.name.replace(/\s+/g, '_')}`
+        const audioPath = `${user.id}/${Date.now()}_${sanitizeFilename(audioFile.name)}`
         const { error: audioError } = await supabase.storage.from('audio').upload(audioPath, audioFile)
         if (audioError) throw audioError
         const { data: urlData } = supabase.storage.from('audio').getPublicUrl(audioPath)
@@ -112,7 +112,7 @@ export default function AdminSongsPage() {
       // Upload cover
       if (coverFile) {
         setUploadProgress('Uploading cover…')
-        const coverPath = `${user.id}/${Date.now()}_${coverFile.name.replace(/\s+/g, '_')}`
+        const coverPath = `${user.id}/${Date.now()}_${sanitizeFilename(coverFile.name)}`
         const { error: coverError } = await supabase.storage.from('covers').upload(coverPath, coverFile)
         if (coverError) throw coverError
         const { data: urlData } = supabase.storage.from('covers').getPublicUrl(coverPath)
@@ -377,6 +377,17 @@ export default function AdminSongsPage() {
       )}
     </div>
   )
+}
+
+function sanitizeFilename(name: string): string {
+  const ext = name.includes('.') ? '.' + name.split('.').pop() : ''
+  const base = name.slice(0, name.length - ext.length)
+  return base
+    .normalize('NFD')                    // décompose les accents (é → e + ́)
+    .replace(/[\u0300-\u036f]/g, '')     // supprime les diacritiques
+    .replace(/[^a-zA-Z0-9._-]/g, '_')   // remplace tout caractère spécial
+    .replace(/_+/g, '_')                 // évite les doubles underscores
+    + ext
 }
 
 function getAudioDuration(file: File): Promise<number> {
