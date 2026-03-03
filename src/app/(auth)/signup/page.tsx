@@ -30,7 +30,7 @@ export default function SignupPage() {
     const { error } = await createClient().auth.signUp({
       email: data.email,
       password: data.password,
-      options: { data: { username: data.username, display_name: data.username }, emailRedirectTo: `${window.location.origin}/` },
+      options: { data: { username: data.username, display_name: data.username }, emailRedirectTo: `${window.location.origin}/home` },
     })
     if (error) { setServerError(error.message); return }
     setSuccess(true)

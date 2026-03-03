@@ -27,7 +27,7 @@ export default function LoginPage() {
     setError(null)
     const { error: err } = await createClient().auth.signInWithPassword({ email: data.email, password: data.password })
     if (err) { setError('Email ou mot de passe incorrect.'); return }
-    router.push('/')
+    router.push('/home')
     router.refresh()
   }
 

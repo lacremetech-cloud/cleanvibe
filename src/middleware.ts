@@ -9,15 +9,11 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
         },
       },
     }
@@ -26,43 +22,35 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  // Redirect authenticated users away from auth pages
+  // Authenticated → redirige hors des pages auth
   if (user && (pathname === '/login' || pathname === '/signup')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/home'
     return NextResponse.redirect(url)
   }
 
-  // Protected app routes — unauthenticated → login
-  const isAppRoute =
-    pathname.startsWith('/search') ||
-    pathname.startsWith('/library') ||
-    pathname.startsWith('/playlist') ||
-    pathname.startsWith('/profile')
+  // Routes protégées
+  const protectedRoutes = ['/home', '/search', '/library', '/playlist', '/profile']
+  const isProtected = protectedRoutes.some(r => pathname.startsWith(r))
 
-  if (!user && isAppRoute) {
+  if (!user && isProtected) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('redirectTo', pathname)
     return NextResponse.redirect(url)
   }
 
-  // Protect admin routes
+  // Admin
   if (pathname.startsWith('/admin')) {
     if (!user) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
     }
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single()
-
+    const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
     if (!profile?.is_admin) {
       const url = request.nextUrl.clone()
-      url.pathname = '/'
+      url.pathname = '/home'
       return NextResponse.redirect(url)
     }
   }
@@ -71,7 +59,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }
