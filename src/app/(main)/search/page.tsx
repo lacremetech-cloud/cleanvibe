@@ -93,7 +93,7 @@ function SearchContent() {
             <>
               <p className="text-xs text-[#64748B] mb-3">{songs.length} résultat{songs.length > 1 ? 's' : ''}</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {songs.map((s) => <SongCard key={s.id} song={s} queue={songs} onLike={toggleLike} />)}
+                {songs.map((s) => <SongCard key={s.id} song={s} queue={songs} />)}
               </div>
             </>
           )}
