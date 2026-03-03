@@ -5,145 +5,85 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import SongCard from '@/components/songs/SongCard'
 import SongRow from '@/components/songs/SongRow'
 import Spinner from '@/components/ui/Spinner'
-import { TrendingUp, Clock, Sparkles } from 'lucide-react'
 
-const GENRES = ['Nasheed', 'Rap', 'R&B', 'Lo-fi', 'Pop', 'Acoustic']
+const GENRES = [
+  { label: 'Nasheed',    color: 'from-violet-600 to-violet-900' },
+  { label: 'Rap',        color: 'from-purple-600 to-purple-900' },
+  { label: 'R&B',        color: 'from-indigo-600 to-indigo-900' },
+  { label: 'Lo-fi',      color: 'from-blue-600 to-blue-900' },
+  { label: 'Acoustique', color: 'from-cyan-600 to-cyan-900' },
+  { label: 'Électro',    color: 'from-teal-600 to-teal-900' },
+]
 
 export default function HomePage() {
   const { profile } = useAuth()
-  const { songs: allSongs, loading, toggleLike } = useSongs({ limit: 50 })
-  const { songs: newReleases } = useSongs({ limit: 8 })
-  const { songs: trending } = useSongs({ limit: 10 })
+  const { songs: newSongs, loading: loadingNew, toggleLike } = useSongs({ limit: 8 })
+  const { songs: trending, loading: loadingTrend } = useSongs({ limit: 8 })
 
   const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Spinner size="lg" />
-      </div>
-    )
-  }
+  const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir'
 
   return (
-    <div className="px-6 py-8 space-y-10">
+    <div className="px-4 sm:px-6 py-6 space-y-8 max-w-6xl mx-auto">
       {/* Greeting */}
       <div>
-        <h1 className="text-3xl font-bold mb-1">
-          {greeting}{profile?.display_name ? `, ${profile.display_name}` : ''} 👋
+        <h1 className="text-2xl font-bold">
+          {greeting}{profile?.display_name ? `, ${profile.display_name}` : ''} 
         </h1>
-        <p className="text-[#64748B] text-sm">What do you want to listen to today?</p>
+        <p className="text-[#64748B] text-sm mt-0.5">Qu'est-ce qu'on écoute aujourd'hui ?</p>
       </div>
 
-      {/* Quick picks — horizontal scroll */}
+      {/* Nouveautés */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-4 h-4 text-[#A78BFA]" />
-          <h2 className="text-lg font-semibold">New Releases</h2>
-        </div>
-        {newReleases.length === 0 ? (
-          <EmptySection message="No songs yet. Check back soon!" />
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {newReleases.map((song) => (
-              <SongCard
-                key={song.id}
-                song={song}
-                queue={newReleases}
-                onLike={toggleLike}
-              />
+        <h2 className="text-base font-semibold mb-3 text-[#94A3B8] uppercase tracking-widest text-xs">Nouveautés</h2>
+        {loadingNew ? <LoadingGrid /> : newSongs.length === 0 ? <Empty /> : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {newSongs.map((s) => <SongCard key={s.id} song={s} queue={newSongs} onLike={toggleLike} />)}
+          </div>
+        )}
+      </section>
+
+      {/* Tendances */}
+      <section>
+        <h2 className="text-xs font-semibold mb-3 text-[#94A3B8] uppercase tracking-widest">Tendances</h2>
+        {loadingTrend ? <Spinner className="mx-auto" /> : trending.length === 0 ? <Empty /> : (
+          <div className="bg-[#0D0D20] border border-[#1A1A35] rounded-2xl overflow-hidden">
+            {trending.map((s, i) => (
+              <SongRow key={s.id} song={s} index={i} queue={trending} onLike={toggleLike} showPlays />
             ))}
           </div>
         )}
       </section>
 
-      {/* Trending */}
+      {/* Genres */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-4 h-4 text-[#A78BFA]" />
-          <h2 className="text-lg font-semibold">Trending Now</h2>
-        </div>
-        {trending.length === 0 ? (
-          <EmptySection message="Nothing trending yet." />
-        ) : (
-          <div className="bg-[#12122A] border border-[#2A2A50] rounded-2xl overflow-hidden">
-            <div className="divide-y divide-[#2A2A50]/40">
-              {trending.map((song, i) => (
-                <SongRow
-                  key={song.id}
-                  song={song}
-                  index={i}
-                  queue={trending}
-                  onLike={toggleLike}
-                  showPlays
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* Browse by genre */}
-      <section>
-        <div className="flex items-center gap-2 mb-4">
-          <Clock className="w-4 h-4 text-[#A78BFA]" />
-          <h2 className="text-lg font-semibold">Browse by Genre</h2>
-        </div>
+        <h2 className="text-xs font-semibold mb-3 text-[#94A3B8] uppercase tracking-widest">Genres</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {GENRES.map((genre, i) => (
-            <GenreCard key={genre} genre={genre} colorIndex={i} />
+          {GENRES.map(({ label, color }) => (
+            <a
+              key={label}
+              href={`/search?genre=${encodeURIComponent(label)}`}
+              className={`rounded-xl p-4 h-16 flex items-end bg-gradient-to-br ${color} hover:scale-[1.02] transition-transform`}
+            >
+              <span className="text-sm font-bold text-white">{label}</span>
+            </a>
           ))}
         </div>
       </section>
-
-      {/* All songs */}
-      {allSongs.length > 0 && (
-        <section>
-          <h2 className="text-lg font-semibold mb-4">All Songs</h2>
-          <div className="bg-[#12122A] border border-[#2A2A50] rounded-2xl overflow-hidden">
-            <div className="divide-y divide-[#2A2A50]/40">
-              {allSongs.map((song, i) => (
-                <SongRow
-                  key={song.id}
-                  song={song}
-                  index={i}
-                  queue={allSongs}
-                  onLike={toggleLike}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   )
 }
 
-function EmptySection({ message }: { message: string }) {
+function LoadingGrid() {
   return (
-    <div className="flex items-center justify-center py-10 text-[#64748B] text-sm bg-[#12122A] rounded-2xl border border-[#2A2A50]">
-      {message}
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="aspect-square rounded-2xl shimmer" />
+      ))}
     </div>
   )
 }
 
-const genreColors = [
-  'from-violet-600 to-violet-900',
-  'from-purple-600 to-purple-900',
-  'from-indigo-600 to-indigo-900',
-  'from-blue-600 to-blue-900',
-  'from-cyan-600 to-cyan-900',
-  'from-teal-600 to-teal-900',
-]
-
-function GenreCard({ genre, colorIndex }: { genre: string; colorIndex: number }) {
-  return (
-    <a
-      href={`/search?genre=${encodeURIComponent(genre)}`}
-      className={`relative overflow-hidden rounded-xl p-4 h-20 flex items-end bg-gradient-to-br ${genreColors[colorIndex % genreColors.length]} hover:scale-[1.02] transition-transform cursor-pointer`}
-    >
-      <span className="text-sm font-bold text-white relative z-10">{genre}</span>
-    </a>
-  )
+function Empty() {
+  return <p className="text-[#64748B] text-sm py-8 text-center">Aucune chanson pour le moment.</p>
 }
