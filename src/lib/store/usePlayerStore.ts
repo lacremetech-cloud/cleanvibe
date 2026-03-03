@@ -14,6 +14,7 @@ interface PlayerState {
   duration: number
   isShuffled: boolean
   repeatMode: 'none' | 'one' | 'all'
+  isExpanded: boolean
 
   // Actions
   playSong: (song: Song, queue?: Song[]) => void
@@ -26,6 +27,7 @@ interface PlayerState {
   setDuration: (duration: number) => void
   toggleShuffle: () => void
   toggleRepeat: () => void
+  toggleExpanded: () => void
   addToQueue: (song: Song) => void
   clearQueue: () => void
 }
@@ -41,6 +43,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   duration: 0,
   isShuffled: false,
   repeatMode: 'none',
+  isExpanded: false,
 
   playSong: (song, queue) => {
     const newQueue = queue ?? [song]
@@ -95,6 +98,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set((s) => ({
       repeatMode: s.repeatMode === 'none' ? 'all' : s.repeatMode === 'all' ? 'one' : 'none',
     })),
+  toggleExpanded: () => set((s) => ({ isExpanded: !s.isExpanded })),
   addToQueue: (song) => set((s) => ({ queue: [...s.queue, song] })),
   clearQueue: () => set({ queue: [], queueIndex: 0 }),
 }))
