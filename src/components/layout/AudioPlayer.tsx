@@ -111,18 +111,14 @@ export default function AudioPlayer() {
 
       {/* Full-screen player */}
       {isExpanded && (
-        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden">
-          {/* Background blur from cover */}
-          <div className="absolute inset-0">
-            {coverUrl ? (
-              <>
-                <Image src={coverUrl} alt="" fill className="object-cover scale-110 blur-3xl opacity-50" unoptimized />
-                <div className="absolute inset-0 bg-gradient-to-b from-cv-bg/50 via-cv-bg/80 to-cv-bg" />
-              </>
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-b from-[#180a30] to-cv-bg" />
-            )}
-          </div>
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#0A0A15]">
+          {/* Background blur from cover — décoration uniquement */}
+          {coverUrl && (
+            <div className="absolute inset-0">
+              <Image src={coverUrl} alt="" fill className="object-cover scale-110 blur-3xl opacity-25" unoptimized />
+              <div className="absolute inset-0 bg-[#0A0A15]/80" />
+            </div>
+          )}
 
           <div className="relative z-10 flex flex-col h-full max-w-md mx-auto w-full overflow-y-auto">
             {/* Header */}
